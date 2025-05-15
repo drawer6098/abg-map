@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asian Female Population Map</title>
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Asian Female Population by County</h1>
+    <div class="controls">
+        <label>Min Age: </label>
+        <input type="number" id="minAge" value="20">
+        <label>Max Age: </label>
+        <input type="number" id="maxAge" value="40">
+        <button onclick="updateMap()">Update Map</button>
+    </div>
+    <div id="map"></div>
+
+    <!-- Leaflet JS and custom code -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
