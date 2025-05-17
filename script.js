@@ -1,69 +1,132 @@
 let map;
-let countiesLayer;
+let geojsonLayer;
+let allData; // Store original data
 
-// Initialize the map
-function initMap() {
-    map = L.map('map').setView([37.8, -96], 4); // Center on the US
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+// Color scale generator
+const colorScale = (value) => {
+  return chroma.scale(['#f0f9ff', '#cce5ff', '#99ccff', '#66b3ff', '#3399ff', '#0080ff'])
+    .domain([0, 0.2, 0.4, 0.6, 1])(value);
+};
 
-    // Load GeoJSON data
-    fetch('data.geojson')
-        .then(response => response.json())
-        .then(data => drawCounties(data));
+async function initMap() {
+    map = L.map('map', {
+        preferCanvas: true,
+        zoomControl: false
+    }).setView([37.8, -96], 4);
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    try {
+        const response = await fetch('data.geojson');
+        allData = await response.json();
+        drawCounties(allData); // Initial draw with default range
+        addLegend();
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
 }
 
-// Draw counties with color based on age range
 function drawCounties(data) {
-    if (countiesLayer) countiesLayer.remove(); // Clear old data
+    if (geojsonLayer) geojsonLayer.remove();
+    
+    // Get current age range
+    const minAge = parseInt(document.getElementById('minAge').value);
+    const maxAge = parseInt(document.getElementById('maxAge').value);
 
-    countiesLayer = L.geoJSON(data, {
-        style: { color: '#444', weight: 0.5 },
+    geojsonLayer = L.geoJSON(data, {
+        style: (feature) => getStyle(feature, minAge, maxAge),
         onEachFeature: (feature, layer) => {
-            // Get age range from user input
-            const minAge = parseInt(document.getElementById('minAge').value);
-            const maxAge = parseInt(document.getElementById('maxAge').value);
+            const props = feature.properties;
+            const total = props.Total_Asian_Females || 0;
+            const selected = calculateSelected(props, minAge, maxAge);
             
-            // Calculate percentage (precomputed in GeoJSON)
-            const total = feature.properties.total;
-            const selected = feature.properties[`ages_${minAge}_${maxAge}`];
-            const percentage = total === 0 ? 0 : (selected / total * 100).toFixed(1);
-
-            // Color the county
-            layer.setStyle({
-                fillColor: getColor(percentage),
-                fillOpacity: 0.7
-            });
-
-            // Show data on click
-            layer.on('click', () => {
-                layer.bindPopup(`
-                    <b>${feature.properties.name}</b><br>
-                    Asian Females (${minAge}-${maxAge}): ${selected}<br>
-                    Percentage: ${percentage}%
-                `).openPopup();
-            });
+            layer.bindPopup(`
+                <b>${props.NAME}</b><br>
+                Total Asian Females: ${total}<br>
+                Selected Age Range (${minAge}-${maxAge}): ${selected}
+            `);
         }
     }).addTo(map);
 }
 
-// Assign colors based on percentage
-function getColor(percentage) {
-    return percentage > 20 ? '#800026' :
-           percentage > 15 ? '#BD0026' :
-           percentage > 10 ? '#E31A1C' :
-           percentage > 5  ? '#FC4E2A' :
-           percentage > 0  ? '#FD8D3C' :
-                              '#FFFFFF';
+function calculateSelected(properties, minAge, maxAge) {
+    // Define age group columns in your data
+    const ageGroups = {
+        '18-19': '18 and 19 years',
+        '20-24': '20 to 24 years',
+        '25-29': '25 to 29 years',
+        '30-34': '30 to 34 years',
+        '35-44': '35 to 44 years',
+        '45-54': '45 to 54 years',
+        '55-64': '55 to 64 years'
+    };
+
+    // Find matching age groups
+    let sum = 0;
+    Object.entries(ageGroups).forEach(([range, field]) => {
+        const [groupMin, groupMax] = range.split('-').map(Number);
+        if (groupMax >= minAge && groupMin <= maxAge) {
+            sum += parseInt(properties[field]) || 0;
+        }
+    });
+    
+    return sum;
 }
 
-// Update the map when the button is clicked
+function getStyle(feature, minAge, maxAge) {
+    const total = feature.properties.Total_Asian_Females || 1; // Avoid division by zero
+    const selected = calculateSelected(feature.properties, minAge, maxAge);
+    const percentage = selected / total;
+
+    return {
+        fillColor: colorScale(percentage),
+        weight: 0.5,
+        opacity: 1,
+        color: '#333', // Darker border for better contrast
+        fillOpacity: 0.8 // Slightly more opaque
+    };
+}
+
 function updateMap() {
-    fetch('data.geojson')
-        .then(response => response.json())
-        .then(data => drawCounties(data));
+    drawCounties(allData); // Redraw with current age range
 }
 
-// Start the map
+function addLegend() {
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = () => {
+        const div = L.DomUtil.create('div', 'legend');
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.innerHTML = `
+            <h4 style="margin:0 0 5px 0; font-size:14px;">% in Selected Age Range</h4>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width:20px; height:20px; background:${colorScale(0)}"></div>
+                    <span>0%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width:20px; height:20px; background:${colorScale(0.25)}"></div>
+                    <span>25%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width:20px; height:20px; background:${colorScale(0.5)}"></div>
+                    <span>50%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width:20px; height:20px; background:${colorScale(0.75)}"></div>
+                    <span>75%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width:20px; height:20px; background:${colorScale(1)}"></div>
+                    <span>100%</span>
+                </div>
+            </div>
+        `;
+        return div;
+    };
+    legend.addTo(map);
+}
+
+// Initialize map
 initMap();
