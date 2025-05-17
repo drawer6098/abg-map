@@ -63,8 +63,8 @@ function drawCounties(data) {
             
             layer.bindPopup(`
                 <b>${props.NAME}</b><br>
-                Total ABGs: ${totalAsianFemales}<br>
-                Selected Age Range (${minAge}-${maxAge}): ${selected}<br>
+                Total ABGs: ${totalAsianFemales.toLocaleString()}<br>
+                Selected Age Range (${minAge}-${maxAge}): ${selected.toLocaleString()}<br>
                 Percentage: ${((selected / totalPopulation) * 100 || 0).toFixed(1)}%
             `);
         }
@@ -95,27 +95,24 @@ function calculateSelected(properties, minAge, maxAge) {
 }
 
 function getStyle(feature, minAge, maxAge) {
-  const totalAsianFemales = calculateTotalAsianFemales(feature.properties);
-  const props = feature.properties;
-  const totalPopulation = props.Total || 0;
+  const totalPopulation = feature.properties.Total || 0;
   const selected = calculateSelected(feature.properties, minAge, maxAge);
   
-  if (totalAsianFemales === 0) return {
-        fillColor: '#f0f0f0',
-        weight: 0.5,
-        color: '#999',
-        fillOpacity: 0.7
+  if (totalPopulation === 0) return {
+    fillColor: '#f0f0f0',
+    weight: 0.5,
+    color: '#999',
+    fillOpacity: 0.7
   };
 
   const percentage = selected / totalPopulation;
   
   return {
-      fillColor: getColor(percentage),
-      weight: 0.5,
-      color: '#333',
-      fillOpacity: 0.7
+    fillColor: getColor(percentage),
+    weight: 0.5,
+    color: '#333',
+    fillOpacity: 0.7
   };
-}
 
 function updateMap() {
     drawCounties(allData); // Redraw with current age range
@@ -127,32 +124,36 @@ function addLegend() {
     const div = L.DomUtil.create('div', 'legend');
     div.style.backgroundColor = 'white';
     div.style.padding = '10px';
+    div.style.fontFamily = "'Noto Sans', sans-serif"; // Add font here
+    
     div.innerHTML = `
-      <h4 style="margin:0 0 5px 0; font-size:14px;">% in Selected Age Range</h4>
+      <h4 style="margin:0 0 5px 0; font-size:14px; font-family: 'Noto Sans', sans-serif; font-weight: bold">
+        % of ABGs in Total Population
+      </h4>
       <div style="display: flex; flex-direction: column; gap: 2px;">
         <div style="display: flex; align-items: center; gap: 5px;">
           <div style="width:20px; height:20px; background:#f0f9ff"></div>
-          <span>0%</span>
+          <span style="font-family: 'Noto Sans', sans-serif">0%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
           <div style="width:20px; height:20px; background:#cce5ff"></div>
-          <span>0-3%</span>
+          <span style="font-family: 'Noto Sans', sans-serif">0-3%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
           <div style="width:20px; height:20px; background:#99ccff"></div>
-          <span>3-6%</span>
+          <span style="font-family: 'Noto Sans', sans-serif">3-6%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
           <div style="width:20px; height:20px; background:#66b3ff"></div>
-          <span>6-9%</span>
+          <span style="font-family: 'Noto Sans', sans-serif">6-9%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
           <div style="width:20px; height:20px; background:#3399ff"></div>
-          <span>9-12%</span>
+          <span style="font-family: 'Noto Sans', sans-serif">9-12%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
           <div style="width:20px; height:20px; background:#0080ff"></div>
-          <span>12-15%</span>
+          <span style="font-family: 'Noto Sans', sans-serif">12-15%</span>
         </div>
       </div>
     `;
