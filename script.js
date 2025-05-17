@@ -20,12 +20,13 @@ function calculateTotalAsianFemales(properties) {
 
 // Discrete color scale with explicit range mapping
 const getColor = (percentage) => {
-  if (percentage >= 0.12) return '#0080ff';      // 12-15%
-  else if (percentage >= 0.09) return '#3399ff';  // 9-12%
-  else if (percentage >= 0.06) return '#66b3ff';  // 6-9%
-  else if (percentage >= 0.03) return '#99ccff';  // 3-6%
-  else if (percentage > 0) return '#cce5ff';      // 0-3%
-  return '#f0f9ff';                              // 0%
+  if (percentage >= 0.07) return '#003366';     // 7-14% (Dark Navy)
+  else if (percentage >= 0.03) return '#004C99';  // 3-7%
+  else if (percentage >= 0.01) return '#0066CC';   // 1-3%
+  else if (percentage >= 0.005) return '#3385FF';  // 0.5-1%
+  else if (percentage >= 0.0025) return '#99C2FF'; // 0.25-0.5%
+  else if (percentage > 0) return '#E6F0FF';       // 0-0.25%
+  return '#F8F9FA';                               // 0% (Light Gray)
 };
 
 async function initMap() {
@@ -125,36 +126,40 @@ function addLegend() {
     const div = L.DomUtil.create('div', 'legend');
     div.style.backgroundColor = 'white';
     div.style.padding = '10px';
-    div.style.fontFamily = "'Noto Sans', sans-serif"; // Add font here
+    div.style.fontFamily = "'Noto Sans', sans-serif";
     
     div.innerHTML = `
       <h4 style="margin:0 0 5px 0; font-size:14px; font-family: 'Noto Sans', sans-serif; font-weight: bold">
-        % of ABGs in Total Population
+        % of Total Population
       </h4>
       <div style="display: flex; flex-direction: column; gap: 2px;">
         <div style="display: flex; align-items: center; gap: 5px;">
-          <div style="width:20px; height:20px; background:#f0f9ff"></div>
+          <div style="width:20px; height:20px; background:#F8F9FA"></div>
           <span style="font-family: 'Noto Sans', sans-serif">0%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
-          <div style="width:20px; height:20px; background:#cce5ff"></div>
-          <span style="font-family: 'Noto Sans', sans-serif">0-3%</span>
+          <div style="width:20px; height:20px; background:#E6F0FF"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0-0.25%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
-          <div style="width:20px; height:20px; background:#99ccff"></div>
-          <span style="font-family: 'Noto Sans', sans-serif">3-6%</span>
+          <div style="width:20px; height:20px; background:#99C2FF"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0.25-0.5%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
-          <div style="width:20px; height:20px; background:#66b3ff"></div>
-          <span style="font-family: 'Noto Sans', sans-serif">6-9%</span>
+          <div style="width:20px; height:20px; background:#3385FF"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0.5-1%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
-          <div style="width:20px; height:20px; background:#3399ff"></div>
-          <span style="font-family: 'Noto Sans', sans-serif">9-12%</span>
+          <div style="width:20px; height:20px; background:#0066CC"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">1-3%</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
-          <div style="width:20px; height:20px; background:#0080ff"></div>
-          <span style="font-family: 'Noto Sans', sans-serif">12-15%</span>
+          <div style="width:20px; height:20px; background:#004C99"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">3-7%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#003366"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">7-14%</span>
         </div>
       </div>
     `;
