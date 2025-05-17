@@ -2,6 +2,16 @@ let map;
 let geojsonLayer;
 let allData; // Store original data
 
+// Discrete color scale with explicit range mapping
+const getColor = (percentage) => {
+  if (percentage >= 0.12) return '#0080ff';      // 12-15%
+  else if (percentage >= 0.09) return '#3399ff';  // 9-12%
+  else if (percentage >= 0.06) return '#66b3ff';  // 6-9%
+  else if (percentage >= 0.03) return '#99ccff';  // 3-6%
+  else if (percentage > 0) return '#cce5ff';      // 0-3%
+  return '#f0f9ff';                              // 0%
+};
+
 // Color scale generator
 const colorScale = (value) => {
   return chroma.scale(['#f0f9ff', '#cce5ff', '#99ccff', '#66b3ff', '#3399ff', '#0080ff'])
@@ -83,24 +93,23 @@ function calculateSelected(properties, minAge, maxAge) {
 
 function getStyle(feature, minAge, maxAge) {
     const total = feature.properties.Total_Asian_Females || 0;
-    const selected = calculateSelected(feature.properties, minAge, maxAge);
-    
-    // Handle zero total case
-    if (total === 0) return {
-        fillColor: '#f0f0f0',
-        weight: 0.5,
-        color: '#999',
-        fillOpacity: 0.7
-    };
+  const selected = calculateSelected(feature.properties, minAge, maxAge);
+  
+  if (total === 0) return {
+    fillColor: '#f0f0f0',
+    weight: 0.5,
+    color: '#999',
+    fillOpacity: 0.7
+  };
 
-    const percentage = selected / total;
-    
-    return {
-        fillColor: colorScale(percentage),
-        weight: 0.5,
-        color: '#333',
-        fillOpacity: 0.7
-    };
+  const percentage = selected / total;
+  
+  return {
+    fillColor: getColor(percentage),  // Use discrete color function
+    weight: 0.5,
+    color: '#333',
+    fillOpacity: 0.7
+  };
 }
 
 function updateMap() {
@@ -108,7 +117,7 @@ function updateMap() {
 }
 
 function addLegend() {
-     const legend = L.control({ position: 'bottomright' });
+  const legend = L.control({ position: 'bottomright' });
   legend.onAdd = () => {
     const div = L.DomUtil.create('div', 'legend');
     div.style.backgroundColor = 'white';
@@ -116,30 +125,35 @@ function addLegend() {
     div.innerHTML = `
       <h4 style="margin:0 0 5px 0; font-size:14px;">% in Selected Age Range</h4>
       <div style="display: flex; flex-direction: column; gap: 2px;">
-        ${createLegendItems().join('')}
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#f0f9ff"></div>
+          <span>0%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#cce5ff"></div>
+          <span>0-3%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#99ccff"></div>
+          <span>3-6%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#66b3ff"></div>
+          <span>6-9%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#3399ff"></div>
+          <span>9-12%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width:20px; height:20px; background:#0080ff"></div>
+          <span>12-15%</span>
+        </div>
       </div>
     `;
     return div;
   };
   legend.addTo(map);
-}
-
-// Helper to create legend items for 5 intervals
-function createLegendItems() {
-  const intervals = [
-    { min: 0, max: 3, mid: 0.015 },
-    { min: 3, max: 6, mid: 0.045 },
-    { min: 6, max: 9, mid: 0.075 },
-    { min: 9, max: 12, mid: 0.105 },
-    { min: 12, max: 15, mid: 0.135 }
-  ];
-
-  return intervals.map(interval => `
-    <div style="display: flex; align-items: center; gap: 5px;">
-      <div style="width:20px; height:20px; background:${colorScale(interval.mid)}"></div>
-      <span>${interval.min}%-${interval.max}%</span>
-    </div>
-  `);
 }
 
 // Initialize map
