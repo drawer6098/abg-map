@@ -5,7 +5,7 @@ let allData; // Store original data
 // Color scale generator
 const colorScale = (value) => {
   return chroma.scale(['#f0f9ff', '#cce5ff', '#99ccff', '#66b3ff', '#3399ff', '#0080ff'])
-    .domain([0, 0.2, 0.4, 0.6, 1])(value);
+    .domain([0, 0.03, 0.06, 0.09, 0.12, 0.15])(value);
 };
 
 async function initMap() {
@@ -66,8 +66,15 @@ function calculateSelected(properties, minAge, maxAge) {
     let sum = 0;
     Object.entries(ageGroups).forEach(([range, field]) => {
         const [groupMin, groupMax] = range.split('-').map(Number);
-        if (groupMax >= minAge && groupMin <= maxAge) {
-            sum += parseInt(properties[field]) || 0;
+        
+        // Calculate overlap between selected range and group range
+        const overlapMin = Math.max(minAge, groupMin);
+        const overlapMax = Math.min(maxAge, groupMax);
+        
+        // Only count if valid overlap
+        if (overlapMin <= overlapMax) {
+            const groupValue = parseInt(properties[field]) || 0;
+            sum += groupValue;
         }
     });
     
@@ -75,16 +82,24 @@ function calculateSelected(properties, minAge, maxAge) {
 }
 
 function getStyle(feature, minAge, maxAge) {
-    const total = feature.properties.Total_Asian_Females || 1; // Avoid division by zero
+    const total = feature.properties.Total_Asian_Females || 0;
     const selected = calculateSelected(feature.properties, minAge, maxAge);
-    const percentage = selected / total;
+    
+    // Handle zero total case
+    if (total === 0) return {
+        fillColor: '#f0f0f0',
+        weight: 0.5,
+        color: '#999',
+        fillOpacity: 0.7
+    };
 
+    const percentage = selected / total;
+    
     return {
         fillColor: colorScale(percentage),
         weight: 0.5,
-        opacity: 1,
-        color: '#333', // Darker border for better contrast
-        fillOpacity: 0.8 // Slightly more opaque
+        color: '#333',
+        fillOpacity: 0.7
     };
 }
 
@@ -93,39 +108,38 @@ function updateMap() {
 }
 
 function addLegend() {
-    const legend = L.control({ position: 'bottomright' });
-    legend.onAdd = () => {
-        const div = L.DomUtil.create('div', 'legend');
-        div.style.backgroundColor = 'white';
-        div.style.padding = '10px';
-        div.innerHTML = `
-            <h4 style="margin:0 0 5px 0; font-size:14px;">% in Selected Age Range</h4>
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width:20px; height:20px; background:${colorScale(0)}"></div>
-                    <span>0%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width:20px; height:20px; background:${colorScale(0.25)}"></div>
-                    <span>25%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width:20px; height:20px; background:${colorScale(0.5)}"></div>
-                    <span>50%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width:20px; height:20px; background:${colorScale(0.75)}"></div>
-                    <span>75%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <div style="width:20px; height:20px; background:${colorScale(1)}"></div>
-                    <span>100%</span>
-                </div>
-            </div>
-        `;
-        return div;
-    };
-    legend.addTo(map);
+     const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = () => {
+    const div = L.DomUtil.create('div', 'legend');
+    div.style.backgroundColor = 'white';
+    div.style.padding = '10px';
+    div.innerHTML = `
+      <h4 style="margin:0 0 5px 0; font-size:14px;">% in Selected Age Range</h4>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        ${createLegendItems().join('')}
+      </div>
+    `;
+    return div;
+  };
+  legend.addTo(map);
+}
+
+// Helper to create legend items for 5 intervals
+function createLegendItems() {
+  const intervals = [
+    { min: 0, max: 3, mid: 0.015 },
+    { min: 3, max: 6, mid: 0.045 },
+    { min: 6, max: 9, mid: 0.075 },
+    { min: 9, max: 12, mid: 0.105 },
+    { min: 12, max: 15, mid: 0.135 }
+  ];
+
+  return intervals.map(interval => `
+    <div style="display: flex; align-items: center; gap: 5px;">
+      <div style="width:20px; height:20px; background:${colorScale(interval.mid)}"></div>
+      <span>${interval.min}%-${interval.max}%</span>
+    </div>
+  `);
 }
 
 // Initialize map
