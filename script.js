@@ -96,6 +96,8 @@ function calculateSelected(properties, minAge, maxAge) {
 
 function getStyle(feature, minAge, maxAge) {
   const totalAsianFemales = calculateTotalAsianFemales(feature.properties);
+  const props = feature.properties;
+  const totalPopulation = props.Total || 0;
   const selected = calculateSelected(feature.properties, minAge, maxAge);
   
   if (totalAsianFemales === 0) return {
@@ -105,7 +107,7 @@ function getStyle(feature, minAge, maxAge) {
         fillOpacity: 0.7
   };
 
-  const percentage = selected / totalAsianFemales;
+  const percentage = selected / totalPopulation;
   
   return {
       fillColor: getColor(percentage),
