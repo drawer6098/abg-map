@@ -65,7 +65,7 @@ function drawCounties(data) {
                 <b>${props.NAME}</b><br>
                 Total ABGs: ${totalAsianFemales.toLocaleString()}<br>
                 Selected Age Range (${minAge}-${maxAge}): ${selected.toLocaleString()}<br>
-                Percentage: ${((selected / totalPopulation) * 100 || 0).toFixed(1)}%
+                Percentage of ABGs: ${totalPopulation === 0 ? '0.0%' : ((selected / totalPopulation * 100).toFixed(1)) + '%'}
             `);
         }
     }).addTo(map);
@@ -113,7 +113,8 @@ function getStyle(feature, minAge, maxAge) {
     color: '#333',
     fillOpacity: 0.7
   };
-
+}
+    
 function updateMap() {
     drawCounties(allData); // Redraw with current age range
 }
