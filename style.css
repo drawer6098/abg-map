@@ -11,6 +11,11 @@
     background: #f0f0f0;
 }
 
+.age-separator {
+    margin: 0 5px;
+    color: #666;
+}
+
 button {
     padding: 5px 15px;
     background: #4CAF50;
