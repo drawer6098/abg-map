@@ -121,52 +121,51 @@ function updateMap() {
 }
 
 function addLegend() {
-    const legend = L.control({ position: 'bottomright' });
-    legend.onAdd = () => {
-        const div = L.DomUtil.create('div', 'legend');
-        div.style.backgroundColor = 'white';
-        div.style.padding = '12px';
-        div.style.fontFamily = "'Noto Sans', sans-serif";
-        div.style.fontSize = '14px';
-        div.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
-        
-        div.innerHTML = `
-            <h4 style="margin:0 0 8px 0; font-size:16px; font-weight:700">% of Total Population</h4>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#F8F9FA; border:1px solid #ddd"></div>
-                    <span>0%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#E6F0FF; border:1px solid #ddd"></div>
-                    <span>0-0.25%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#99C2FF; border:1px solid #ddd"></div>
-                    <span>0.25-0.5%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#3385FF; border:1px solid #ddd"></div>
-                    <span>0.5-1%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#0066CC; border:1px solid #ddd"></div>
-                    <span>1-3%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#004C99; border:1px solid #ddd"></div>
-                    <span>3-7%</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width:24px; height:24px; background:#003366; border:1px solid #ddd"></div>
-                    <span>7-14%</span>
-                </div>
-            </div>
-        `;
-        return div;
-    };
-    legend.addTo(map);
-}
+  const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = () => {
+    const div = L.DomUtil.create('div', 'legend');
+    div.style.backgroundColor = 'white';
+    div.style.padding = '10px';
+    div.style.fontFamily = "'Noto Sans', sans-serif";
+    
+    div.innerHTML = `
+      <h4 style="margin:0 0 5px 0; font-size:14px; font-family: 'Noto Sans', sans-serif; font-weight: 700">
+        % of Total Population
+      </h4>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#F8F9FA"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#E6F0FF"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0-0.25%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#99C2FF"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0.25-0.5%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#3385FF"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">0.5-1%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#0066CC"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">1-3%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#004C99"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">3-7%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width:24px; height:24px; background:#003366"></div>
+          <span style="font-family: 'Noto Sans', sans-serif">7-14%</span>
+        </div>
+      </div>
+    `;
+    return div;
+  };
+  legend.addTo(map);
 }
 
 // Initialize map
